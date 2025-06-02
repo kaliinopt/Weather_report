@@ -41,4 +41,20 @@ FastAPI-приложение для получения прогноза пого
     http://localhost:8000
     ```
 
-### 
+### Запуск через докер
+
+
+1. Соберите Docker-образ:
+   ```bash
+   docker build -t weather-app .
+   ```
+
+2. Запустите контейнер:
+
+    ```bash
+    docker run -p 8000:8000 --name weather-container weather-app
+    ```
+3. Приложение будет доступно по адресу:
+    ```
+    http://localhost:8000
+    ```
