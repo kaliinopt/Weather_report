@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Прогноз погоды</title>
+     <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Прогноз погоды</h1>
+
+    <form method="post">
+        <input type="text" name="city" id="city-input" list="city-list" placeholder="Введите город" required>
+        <datalist id="city-list"></datalist>
+        <button type="submit">Узнать погоду</button>
+    </form>
+
+    {% if city %}
+    {% if not forecast.error and not error %}
+        <h2>Погода в городе {{ city }}</h2>
+    {% endif %}
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        {% if forecast.error %}
+            <p class="error">{{ forecast.error }}</p>
+        {% else %}
+            <table>
+                <tr>
+                    <th>Время</th>
+                    <th>Температура (°C)</th>
+                    <th>Давление (гПа)</th>
+                    <th>Ветер (м/с)</th>
+                    <th>Влажность (%)</th>
+                    <th>Облачность (%)</th>
+                </tr>
+                {% for item in forecast.forecast %}
+                    <tr>
+                        <td>{{ item.time }}</td>
+                        <td>{{ item.temperature }}</td>
+                        <td>{{ item.pressure }}</td>
+                        <td>{{ item.wind_speed }}</td>
+                        <td>{{ item.humidity }}</td>
+                        <td>{{ item.clouds }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    {% endif %}
+
+<script>
+    const input = document.getElementById("city-input");
+    const datalist = document.getElementById("city-list");
+    let timer;
+
+    input.addEventListener("input", () => {
+        clearTimeout(timer);
+        const query = input.value.trim();
+
+        if (query.length < 2) return;
+
+        timer = setTimeout(() => {
+            fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&language=ru&count=5`)
+                .then(response => response.json())
+                .then(data => {
+                    datalist.innerHTML = "";
+                    if (data.results) {
+                        data.results.forEach(city => {
+                            const option = document.createElement("option");
+                            option.value = `${city.name}, ${city.country}`;
+                            datalist.appendChild(option);
+                        });
+                    }
+                });
+        }, 300);
+    });
+</script>
+</body>
+</html>
